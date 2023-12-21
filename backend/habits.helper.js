@@ -4,57 +4,72 @@ import fs from "fs/promises";
 const habitsPath = path.join(process.cwd(), "./database.json");
 const todayString = () => new Date().toISOString().slice(0, 10);
 
-const getHabits = async () => {
-  const habitsFile = await fs.readFile(habitsPath);
-  return JSON.parse(habitsFile.toString());
+const readDatabase = async () => {
+  const databaseFile = await fs.readFile(habitsPath, "utf-8");
+  return JSON.parse(databaseFile);
 };
 
-const getTodayHabits = async () => {
-  const habitsFile = await fs.readFile(habitsPath);
-  const habits = JSON.parse(habitsFile.toString()).habits;
+const writeDatabase = async (newDatabase) => {
+  const databaseFile = await fs.readFile(habitsPath, "utf-8");
+  const database = JSON.parse(databaseFile);
+
+  await fs.writeFile(
+    habitsPath,
+    JSON.stringify({ ...database, ...newDatabase }, null, 2)
+  );
+};
+
+export const getHabits = async () => {
+  const habitsDatabase = await readDatabase();
+
+  return habitsDatabase.habits;
+};
+
+export const getTodayHabits = async () => {
   const today = todayString();
-  const habitsWithDoneStats = Object.values(habits).map((habit) => {
+  const habits = await getHabits();
+  const habitsWithDoneStats = habits.map((habit) => {
     return {
-      ...habit,
+      id: habit.id,
+      title: habit.title,
       done: habit.daysDone[today] || false,
     };
   });
-  return JSON.stringify(habitsWithDoneStats);
+  return habitsWithDoneStats;
 };
 
-const addHabit = async (title) => {
-  const habitsFile = await fs.readFile(habitsPath);
-  const habits = JSON.parse(habitsFile.toString()).habits;
+export const addHabit = async (title) => {
+  const habits = await getHabits();
   const newHabit = {
     id: habits[habits.length - 1]?.id + 1 || 0,
     title,
     daysDone: {},
   };
 
-  const newHabitsContent = { habits: [...habits, newHabit] };
+  habits.push(newHabit);
 
-  await fs.writeFile(habitsPath, JSON.stringify(newHabitsContent, null, 2));
+  await writeDatabase({ habits });
+
+  return newHabit;
 };
 
-const updateHabit = async (id, done) => {
-  const habitsFile = await fs.readFile(habitsPath);
-  const habits = JSON.parse(habitsFile.toString()).habits;
-  const habitIndex = Object.values(habits).findIndex(
-    (habit) => habit.id === id
-  );
-  if (habitIndex === -1) {
-    throw new Error("Habit not found");
+export const updateHabit = async (id, done) => {
+  const habits = await getHabits();
+  const habitToUpdate = habits.find((habit) => habit.id === id);
+
+  if (!habitToUpdate) {
+    throw new Error("Habit ID is invalid");
   }
-  const habitToUpdate = habits[habitIndex];
+
   const today = todayString();
+
   if (done) {
     habitToUpdate.daysDone[today] = true;
   } else {
     delete habitToUpdate.daysDone[today];
   }
-  const newHabitsContent = { habits: [...habits] };
 
-  await fs.writeFile(habitsPath, JSON.stringify(newHabitsContent, null, 2));
+  await writeDatabase({ habits });
+
+  return habitToUpdate;
 };
-
-export { getHabits, getTodayHabits, addHabit, updateHabit };
