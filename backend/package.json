@@ -13,7 +13,9 @@
   "license": "MIT",
   "dependencies": {
     "@fastify/cors": "^8.5.0",
-    "fastify": "^4.25.1"
+    "fastify": "^4.25.1",
+    "fs.promises": "^0.1.2",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
