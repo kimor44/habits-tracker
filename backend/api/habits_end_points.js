@@ -3,6 +3,10 @@ import path from "path";
 import fs from "fs/promises";
 
 const habitsPath = path.join(process.cwd(), "./database.json");
+const today = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+};
 
 const loadHabitsEndPoints = () => {
   // home route
@@ -41,8 +45,7 @@ const loadHabitsEndPoints = () => {
     if (typeof request.params !== "object" || request.params === null) {
       throw new Error("Invalid request params");
     }
-    const date = new Date();
-    const dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    const todayString = today();
 
     const habitsFile = await fs.readFile(habitsPath);
     const habits = JSON.parse(habitsFile.toString());
@@ -52,11 +55,11 @@ const loadHabitsEndPoints = () => {
       throw new Error("Habit not found");
     }
     const habitToUpdate = habits[habitIndex];
-    const hasDate = Object.keys(habitToUpdate.daysDone).includes(dateString);
+    const hasDate = Object.keys(habitToUpdate.daysDone).includes(todayString);
     if (hasDate) {
-      delete habitToUpdate.daysDone[dateString];
+      delete habitToUpdate.daysDone[todayString];
     } else {
-      habitToUpdate.daysDone[dateString] = true;
+      habitToUpdate.daysDone[todayString] = true;
     }
 
     await fs.writeFile(
@@ -65,6 +68,21 @@ const loadHabitsEndPoints = () => {
     );
 
     reply.status(200).send(habitToUpdate);
+  });
+
+  // get /habits/today
+  fastify.get("/habits/today", async () => {
+    const habitsFile = await fs.readFile(habitsPath);
+    const habits = JSON.parse(habitsFile.toString());
+    const todayString = today();
+    const habitsToday = habits.map((habit) => {
+      const isDone = Object.keys(habit.daysDone).includes(todayString);
+      return {
+        ...habit,
+        isDone,
+      };
+    });
+    return habitsToday;
   });
 };
 
