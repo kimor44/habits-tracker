@@ -37,6 +37,35 @@ const loadHabitsEndPoints = () => {
   });
 
   // patch habit
+  fastify.patch("/habits/:id", async (request, reply) => {
+    if (typeof request.params !== "object" || request.params === null) {
+      throw new Error("Invalid request params");
+    }
+    const date = new Date();
+    const dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+    const habitsFile = await fs.readFile(habitsPath);
+    const habits = JSON.parse(habitsFile.toString());
+    const habitId = Number(request.params.id);
+    const habitIndex = habits.findIndex((habit) => habit.id === habitId);
+    if (habitIndex === -1) {
+      throw new Error("Habit not found");
+    }
+    const habitToUpdate = habits[habitIndex];
+    const hasDate = Object.keys(habitToUpdate.daysDone).includes(dateString);
+    if (hasDate) {
+      delete habitToUpdate.daysDone[dateString];
+    } else {
+      habitToUpdate.daysDone[dateString] = true;
+    }
+
+    await fs.writeFile(
+      habitsPath,
+      JSON.stringify([...habits, habitToUpdate], null, 2)
+    );
+
+    reply.status(200).send(habitToUpdate);
+  });
 };
 
 export { loadHabitsEndPoints };
