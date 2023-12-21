@@ -10,33 +10,38 @@ const getHabits = async () => {
 };
 
 const getTodayHabits = async () => {
-  const habits = await getHabits();
+  const habitsFile = await fs.readFile(habitsPath);
+  const habits = JSON.parse(habitsFile.toString()).habits;
   const today = todayString();
-  return habits.map((habit) => ({
-    ...habit,
-    done: habit.daysDone[today] === true,
-  }));
+  const habitsWithDoneStats = Object.values(habits).map((habit) => {
+    return {
+      ...habit,
+      done: habit.daysDone[today] || false,
+    };
+  });
+  return JSON.stringify(habitsWithDoneStats);
 };
 
 const addHabit = async (title) => {
   const habitsFile = await fs.readFile(habitsPath);
-  const habits = JSON.parse(habitsFile.toString());
+  const habits = JSON.parse(habitsFile.toString()).habits;
   const newHabit = {
-    id: habits[habits.length - 1]?.id || 0,
+    id: habits[habits.length - 1]?.id + 1 || 0,
     title,
     daysDone: {},
   };
 
-  await fs.writeFile(
-    habitsPath,
-    JSON.stringify([...habits, newHabit], null, 2)
-  );
+  const newHabitsContent = { habits: [...habits, newHabit] };
+
+  await fs.writeFile(habitsPath, JSON.stringify(newHabitsContent, null, 2));
 };
 
 const updateHabit = async (id, done) => {
   const habitsFile = await fs.readFile(habitsPath);
-  const habits = JSON.parse(habitsFile.toString());
-  const habitIndex = habits.findIndex((habit) => habit.id === id);
+  const habits = JSON.parse(habitsFile.toString()).habits;
+  const habitIndex = Object.values(habits).findIndex(
+    (habit) => habit.id === id
+  );
   if (habitIndex === -1) {
     throw new Error("Habit not found");
   }
@@ -47,10 +52,9 @@ const updateHabit = async (id, done) => {
   } else {
     delete habitToUpdate.daysDone[today];
   }
-  await fs.writeFile(
-    habitsPath,
-    JSON.stringify([...habits, habitToUpdate], null, 2)
-  );
+  const newHabitsContent = { habits: [...habits] };
+
+  await fs.writeFile(habitsPath, JSON.stringify(newHabitsContent, null, 2));
 };
 
 export { getHabits, getTodayHabits, addHabit, updateHabit };
