@@ -14,7 +14,7 @@
       </div>
 
       <button id="add-new-habit">Add new habit</button>
-      <!-- <button id="open-history">See history</button> -->
+      <button id="open-history">See history</button>
     </div>
 
     <dialog class="dialog" id="add-habit-dialog">
@@ -25,6 +25,16 @@
           <button type="Submit">Add</button>
         </form>
 
+        <form method="dialog">
+          <button type="submit" class="close-button">X</button>
+        </form>
+      </div>
+    </dialog>
+
+    <dialog class="dialog" id="habits-history-dialog">
+      <div class="dialog-content">
+        <h2>Habits history</h2>
+        <div id="table-wrapper"></div>
         <form method="dialog">
           <button type="submit" class="close-button">X</button>
         </form>

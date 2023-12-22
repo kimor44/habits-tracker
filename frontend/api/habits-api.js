@@ -39,5 +39,5 @@ export const updateHabitDone = (id, done) => {
     body: JSON.stringify({
       done,
     }),
-  });
+  }).then((response) => response.json());
 };
