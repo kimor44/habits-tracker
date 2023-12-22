@@ -22,6 +22,11 @@ export class AddHabitDialog {
     this.addHabitFormElement.addEventListener("submit", (event) =>
       this.handleSubmit(event)
     );
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      this.dialogElement.close();
+    });
   }
 
   async handleSubmit(event) {

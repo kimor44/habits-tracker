@@ -17,6 +17,11 @@ export class HabitHistoryDialog {
       this.habitHistoryDialog.showModal();
       this.render();
     });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      this.habitHistoryDialog.close();
+    });
   }
 
   async render() {
