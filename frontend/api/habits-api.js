@@ -1,16 +1,16 @@
-const baseUrl = process.env.BASE_URL;
+const baseUrl = "http://127.0.0.1:3000";
 
 export const getHabits = () => {
-  fetch(`${baseUrl}/habits`, {
+  return fetch(`${baseUrl}/habits`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
-  });
+  }).then((response) => response.json());
 };
 
 export const createHabit = (title) => {
-  fetch(`${baseUrl}/habits`, {
+  return fetch(`${baseUrl}/habits`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,16 +22,16 @@ export const createHabit = (title) => {
 };
 
 export const getTodayHabits = () => {
-  fetch(`${baseUrl}/habits/today`, {
+  return fetch(`${baseUrl}/habits/today`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
-  });
+  }).then((response) => response.json());
 };
 
 export const updateHabitDone = (id, done) => {
-  fetch(`${baseUrl}/habits/${id}`, {
+  return fetch(`${baseUrl}/habits/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
