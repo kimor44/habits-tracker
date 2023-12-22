@@ -18,7 +18,7 @@ export const createHabit = (title) => {
     body: JSON.stringify({
       title,
     }),
-  });
+  }).then((response) => response.json());
 };
 
 export const getTodayHabits = () => {
